@@ -1,4 +1,4 @@
 streamlit
 pandas
-spotipy
+spotipy --upgrade
 json
