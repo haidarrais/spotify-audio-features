@@ -3,8 +3,18 @@ import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import json
+import datetime
 
 st.markdown("# Hi I'am Audio Features Extractor 🎈")
+
+df = None
+
+@st.cache_data
+def convert_df(df, state):
+    df = pd.DataFrame(state)
+    return df.to_csv(index=False).encode('utf-8')
+
+ts = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 def main():
     # Create input fields for the data you want to post to the API
@@ -59,6 +69,14 @@ def main():
                                 'duration_ms', 'time_signature']]
         
         st.dataframe(features_df)
+        fdf = convert_df(df, features_df)
+        st.download_button(
+        "Download as CSV",
+        fdf,
+        f"{ts}.csv",
+        "text/csv",
+        key='download-csv-ci'
+        )
 
 if __name__ == "__main__":
     main()
