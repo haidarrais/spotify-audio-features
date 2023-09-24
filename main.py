@@ -20,7 +20,6 @@ def main():
     # Create input fields for the data you want to post to the API
     username = st.text_input("Username", value="simon.th7")
     pl_id = st.text_input("Playlist ID", value="5NH8uTSrEdvFg6zGyjfdUh")
-    like = st.text_input("Like?", value="true")
 
     # Create a submit button
     if st.button("Submit", key="submitted"):
@@ -29,7 +28,6 @@ def main():
         client_secret = credentials['client_secret']
 
         playlist_uri = "spotify:username" + username + "playlist:" + pl_id 
-        like = like
         client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
         sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
@@ -43,10 +41,12 @@ def main():
         playlist_tracks_titles = []
         playlist_tracks_artists = []
         playlist_tracks_first_artists = []
+        playlist_tracks_popularity = []
 
         for track in playlist_tracks_data['items']:
             playlist_tracks_id.append(track['track']['id'])
             playlist_tracks_titles.append(track['track']['name'])
+            playlist_tracks_popularity.append(track['track']['popularity'])
             # adds a list of all artists involved in the song to the list of artists for the playlist
             artist_list = []
             for artist in track['track']['artists']:
@@ -61,12 +61,13 @@ def main():
         features_df['title'] = playlist_tracks_titles
         features_df['first_artist'] = playlist_tracks_first_artists
         features_df['all_artists'] = playlist_tracks_artists
+        features_df['popularity'] = playlist_tracks_popularity
         #features_df = features_df.set_index('id')
         features_df = features_df[['id', 'title', 'first_artist', 'all_artists',
-                                'danceability', 'energy', 'key', 'loudness',
-                                'mode', 'acousticness', 'instrumentalness',
-                                'liveness', 'valence', 'tempo',
-                                'duration_ms', 'time_signature']]
+                                'danceability', 'energy', 'key', 'popularity',
+                                'loudness', 'mode', 'acousticness',
+                                'instrumentalness', 'liveness', 'valence',
+                                'tempo', 'duration_ms', 'time_signature']]
         
         st.dataframe(features_df)
         fdf = convert_df(df, features_df)
