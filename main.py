@@ -4,6 +4,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import json
 import datetime
+import requests
 
 st.markdown("# Hi I'am Audio Features Extractor 🎈")
 
@@ -18,8 +19,17 @@ ts = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 def main():
     # Create input fields for the data you want to post to the API
-    username = st.text_input("Username", value="simon.th7")
-    pl_id = st.text_input("Playlist ID", value="5NH8uTSrEdvFg6zGyjfdUh")
+    username = st.text_input("Username", value="21uigsizzf6xs2b3iphqnelci")
+    pl_id = st.text_input("Playlist ID", value="1ERuHhasek7qD73MrWRrsx")
+
+    url = "https://spotify-track-streams-playback-count1.p.rapidapi.com/tracks/spotify_track_streams"
+
+    querystring = {"spotify_track_id":"6ho0GyrWZN3mhi9zVRW7xi","isrc":"CA5KR1821202"}
+
+    headers = {
+        "X-RapidAPI-Key": "136d06e556mshcf7fb4cd84c3cabp12318ajsn50ff895d015f",
+        "X-RapidAPI-Host": "spotify-track-streams-playback-count1.p.rapidapi.com"
+    }
 
     # Create a submit button
     if st.button("Submit", key="submitted"):
@@ -42,6 +52,7 @@ def main():
         playlist_tracks_artists = []
         playlist_tracks_first_artists = []
         playlist_tracks_popularity = []
+        playlist_tracks_playback_count = []
 
         for track in playlist_tracks_data['items']:
             playlist_tracks_id.append(track['track']['id'])
@@ -53,6 +64,11 @@ def main():
                 artist_list.append(artist['name'])
             playlist_tracks_artists.append(artist_list)
             playlist_tracks_first_artists.append(artist_list[0])
+            querystring['spotify_track_id'] = track['track']['id']
+            response = requests.get(url, headers=headers, params=querystring)
+            playback = response.json()
+            playlist_tracks_playback_count.append(playback['streams'])
+
 
         features = sp.audio_features(playlist_tracks_id)
 
@@ -62,9 +78,10 @@ def main():
         features_df['first_artist'] = playlist_tracks_first_artists
         features_df['all_artists'] = playlist_tracks_artists
         features_df['popularity'] = playlist_tracks_popularity
+        features_df['streams'] = playlist_tracks_playback_count
         #features_df = features_df.set_index('id')
         features_df = features_df[['id', 'title', 'first_artist', 'all_artists',
-                                'danceability', 'energy', 'key', 'popularity',
+                                'danceability', 'energy', 'key', 'popularity', 'streams',
                                 'loudness', 'mode', 'acousticness',
                                 'instrumentalness', 'liveness', 'valence',
                                 'tempo', 'duration_ms', 'time_signature']]
